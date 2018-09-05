@@ -1,4 +1,5 @@
 var rabbitmq = require('./rabbitmq/bus');
+var kafkabus = require('./kafka/bus');
 
 module.exports.bus = function bus (options, implOpts) {
   return new rabbitmq.Bus(options, implOpts);
@@ -13,3 +14,5 @@ module.exports.namedBus = function namedBus(name, options, implOpts) {
   }
   return bus;
 };
+
+module.exports.kafkaBus = kafkabus

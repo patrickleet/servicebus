@@ -79,11 +79,11 @@ Bus.prototype.handleOutgoing = function (queueName, message, options, callback) 
   return next(null, queueName, message, options);
 };
 
-Bus.prototype.correlate = require('./middleware/correlate');
-Bus.prototype.messageDomain = require('./middleware/messageDomain');
-Bus.prototype.logger = require('./middleware/logger');
-Bus.prototype.package = require('./middleware/package');
-Bus.prototype.retry = require('./middleware/retry');
+Bus.prototype.correlate = require('../middleware/correlate');
+Bus.prototype.messageDomain = require('../middleware/messageDomain');
+Bus.prototype.logger = require('../middleware/logger');
+Bus.prototype.package = require('../middleware/package');
+Bus.prototype.retry = require('../middleware/retry');
 
 Bus.prototype.createCorrelationId = Bus.prototype.correlationId = function (forceNew) {
   if (process.domain && process.domain.correlationId && ! forceNew) {
