@@ -11,7 +11,7 @@ describe('kafka servicebus', function(){
 
   describe('#send & #listen', function() {
 
-    it.only('should cause message to be received by listen', async function (){
+    it('should cause message to be received by listen', async function (){
       return new Promise(async (resolve, reject) => {
         let bus = await kafkabus()
         this.timeout(30000);
@@ -66,30 +66,29 @@ describe('kafka servicebus', function(){
       })
     });
 
-    it('can handle high event throughput', async function (){
+    it.only('can handle high event throughput', async function (){
       return new Promise(async (resolve, reject) => {
         let bus = await kafkabus()
         let time = 30000
         this.timeout(time);
         setTimeout(() => {
           console.log(`processed ${count} messages`)
-        }, time - 500)
-        var count = 0, endCount = 15000;
+        }, time - 100)
+        var count = 0, endCount = 12000;
         function tryDone(){
           count++;
-          if (count > endCount) {
+          if (count >= endCount) {
+            console.log(`processed ${count} messages`)
             resolve();
           }
         }
         var i = 0;
-        bus.listen('my.event.3', function (event) {
+        await bus.listen('my.event.3', function (event) {
           tryDone();
         });
-        setTimeout(function () {
-          for(var i = 0; i <= endCount; ++i) {
-            bus.send('my.event.3', { my: 'event' });
-          }
-        }, 100);
+        for(var i = 0; i <= endCount; ++i) {
+          await bus.send('my.event.3', { my: 'event' });
+        }
       })
     });
 

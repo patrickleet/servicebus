@@ -3,10 +3,10 @@ require('longjohn');
 let log = require('debug')('servicebus')
 let { connectionOpts } = require('../testHelpers')
 
-if ( ! process.env.KAFKA_HOSTS)
-  throw new Error('Tests require a KAFKA_HOSTS environment variable to be set, pointing to the Kafka instance you wish to use.');
+// if ( ! process.env.KAFKA_HOSTS)
+//   throw new Error('Tests require a KAFKA_HOSTS environment variable to be set, pointing to the Kafka instance you wish to use.');
 
-var brokers = process.env.KAFKA_HOSTS;
+// var brokers = process.env.KAFKA_HOSTS;
 var retry = require('servicebus-retry');
 
 let kafkaBus = require('../').kafkaBus
