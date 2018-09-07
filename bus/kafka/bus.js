@@ -62,7 +62,7 @@ class KafkaBus extends Bus {
       kafkaBus.log('initializing kafkabus')
       // Do async stuff
       await kafkaBus.connect()
-      kafkaBus.log('connected to producer', kafkaBus)
+      kafkaBus.log('connected to producer')
       kafkaBus.log(kafkaBus.listen)
 
       kafkaBus.initialized = true
@@ -118,8 +118,8 @@ class KafkaBus extends Bus {
           throw error
         }
     
-        topics[options.topicName] = topic
-        log('topic registered', topic)
+        topics[topicName] = topic
+        log('topic registered', topicName)
 
         return resolve(topic)  
       } else {
@@ -158,7 +158,6 @@ class KafkaBus extends Bus {
         } ]
       })
 
-      log(result)
       return result
     }
   

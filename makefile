@@ -16,7 +16,7 @@ test:
 	RABBITMQ_URL=$(RABBITMQ_URL) KAFKA_HOSTS=$(KAFKA_HOSTS) DEBUG= ./node_modules/.bin/mocha -R spec --recursive --exit
 
 test-debug:
-	RABBITMQ_URL=$(RABBITMQ_URL) KAFKA_HOSTS=$(KAFKA_HOSTS) HOST_IP=$(HOST_IP) DEBUG=$(DEBUG) KAFKAJS_LOG_LEVEL= \
+	RABBITMQ_URL=$(RABBITMQ_URL) KAFKA_HOSTS=$(KAFKA_HOSTS) HOST_IP=$(HOST_IP) DEBUG=$(DEBUG) KAFKAJS_LOG_LEVEL=error \
 		./scripts/testWithKafka.sh "./node_modules/.bin/mocha -R spec --recursive --exit"
 
 .PHONY: test test-debug

@@ -6,7 +6,7 @@ const sinon = require('sinon');
 const util = require('util');
 const {} = '../testHelpers'
 
-describe.skip('kafka servicebus', function(){
+describe('kafka servicebus', function(){
 
 
   describe('#send & #listen', function() {
@@ -14,7 +14,7 @@ describe.skip('kafka servicebus', function(){
     it.only('should cause message to be received by listen', async function (){
       return new Promise(async (resolve, reject) => {
         let bus = await kafkabus()
-        this.timeout(90000);
+        this.timeout(30000);
         log('bus.listen', bus.listen)
         let listener = await bus.listen('my.event.1', function (event) {
           console.log('event data', event.data)
@@ -24,27 +24,37 @@ describe.skip('kafka servicebus', function(){
       })      
     });
 
-    it('should distribute out to subsequent listeners when multiple listening', async function (){
+    it.skip('should distribute out to subsequent listeners when multiple listening', async function (){
       return new Promise(async (resolve, reject) => {
         let bus = await kafkabus()
         this.timeout(90000);
-        var count = 0;
+        var count = 0
+        var results = []
         function tryDone(){
           count++;
           if (count === 4) {
+            expect(results).toEqual([1,2,3,4])
             resolve(true);
           }
         }
         bus.listen('my.event.2', function (event) {
+          results.push(1)
+          console.log(1)
           tryDone();
         });
         bus.listen('my.event.2', function (event) {
+          results.push(2)
+          console.log(2)
           tryDone();
         });
         bus.listen('my.event.2', function (event) {
+          results.push(3)
+          console.log(3)
           tryDone();
         });
         bus.listen('my.event.2', function (event) {
+          results.push(4)
+          console.log(4)
           tryDone();
         });
         setTimeout(function () {
@@ -59,7 +69,11 @@ describe.skip('kafka servicebus', function(){
     it('can handle high event throughput', async function (){
       return new Promise(async (resolve, reject) => {
         let bus = await kafkabus()
-        this.timeout(90000);
+        let time = 30000
+        this.timeout(time);
+        setTimeout(() => {
+          console.log(`processed ${count} messages`)
+        }, time - 500)
         var count = 0, endCount = 15000;
         function tryDone(){
           count++;

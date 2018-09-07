@@ -81,7 +81,7 @@ class TopicConsumer extends EventEmitter {
       await consumer.run({
         eachMessage: ({ topic, partition, message }) => {
           log(`handling incoming message on topic ${topic}`)
-          log({ message })
+          // log({ message })
           handleIncoming.call(
             bus,
             consumer, 
@@ -90,6 +90,7 @@ class TopicConsumer extends EventEmitter {
             function (consumer, message, options) {
               try {
                 let messageData = JSON.parse(message.value.toString())
+                log('messageData:', messageData)
                 messageHandler({ data: messageData }, message);
               } catch (err) {
                 log('Error handling message')

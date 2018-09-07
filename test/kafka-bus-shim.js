@@ -17,8 +17,7 @@ module.exports = async function () {
   try {
     bus = await kafkaBus({
       ...connectionOpts(),
-      // brokers: ['localhost:9092', 'localhost:9095', 'localhost:9098'],
-      brokers: ['localhost:9094'],
+      brokers: ['localhost:9093', 'localhost:9095', 'localhost:9097'],
       serviceName: 'test',
     });
   } catch (e) {
