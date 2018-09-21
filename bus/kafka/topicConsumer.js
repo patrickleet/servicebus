@@ -1,30 +1,34 @@
 const { EventEmitter } = require('events')
-const extend = require('extend');
-const util = require('util');
-const kafka = require('kafkajs')
 const requiredParam = require('../lib/requiredParam')
 
 class TopicConsumer extends EventEmitter {
   constructor({
     topicName = requiredParam('topicName'),
     bus = requiredParam('bus'),
-    messageHandler = requiredParam('messageHandler')
+    messageHandler = requiredParam('messageHandler'),
+    messageType = requiredParam('messageType')
   } = {}) {
     super()
 
     const self = this
     const { log, kafka, serviceName } = bus
 
+    let groupId = `${serviceName}-${topicName}-${messageType}-consumer`
+
     Object.assign(this, {
       topicName,
       bus,
       messageHandler,
-      log
+      log,
+      groupId,
+      messageType
     })
 
-    log(`new consumer for topic ${topicName}`)
+    log(`new consumer for topic ${topicName} with consumer group id ${groupId}`)
 
-    this.consumer = kafka.consumer({ groupId: `${serviceName}-${topicName}-consumer-group` })
+    this.consumer = kafka.consumer({
+      groupId
+    })
   }
 
   static init (options) {
@@ -91,7 +95,7 @@ class TopicConsumer extends EventEmitter {
               try {
                 let messageData = JSON.parse(message.value.toString())
                 log('messageData:', messageData)
-                messageHandler({ data: messageData }, message);
+                messageHandler(messageData, message);
               } catch (err) {
                 log('Error handling message')
                 throw err
@@ -112,47 +116,3 @@ module.exports = async function topicConsumer (options) {
   let topic = await TopicConsumer.init(options)
   return topic
 }
-
-
-
-// this.consumer = new kafka.Consumer(this.bus.client, [{ topic: this.topicName }], this.bus.consumerOptions);
-
-//     this.consumer.on('message', function(message) {
-
-//       // Read string into a buffer.
-//       const buf = new Buffer(message.value, 'binary'); 
-//       const decodedMessage = JSON.parse(buf.toString());
-
-//       log({ decodedMessage });
-      
-//       let message = {
-//         id: decodedMessage.id,
-//         type: decodedMessage.type,
-//         data: JSON.stringify(decodedMessage.data),
-//         cid: decodedMessage.cid
-//       };
-
-//       log('handle incoming message');
-//       log({ message });
-
-//       self.bus.handleIncoming(self.consumer, message, options, function (consumer, message, options) {
-//         try {
-//           self.messageHandler(message.content, message);
-//         } catch (err) {
-//           if (process.domain && process.domain.listeners('error')) {
-//             process.domain.emit('error', err);
-//           } else {
-//             self.emit('error', err);
-//           }
-//         }
-//       });
-//     });
-
-//     this.consumer.on('error', function(err) {
-//       self.bus.log('consumer error', err);
-//       self.bus.emit('consumer.error', err)
-//     });
-
-
-//     this.emit('ready');
-//     this.initialized = true;
