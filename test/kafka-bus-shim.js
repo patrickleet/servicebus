@@ -29,12 +29,12 @@ module.exports = async function () {
   log(bus)
 
   // bus.use(bus.messageDomain());
-  // bus.use(bus.package());
-  // bus.use(bus.correlate());
+  bus.use(bus.package());
+  bus.use(bus.correlate());
   // bus.use(bus.logger());
-  // bus.use(retry({
-  //   store: retry.MemoryStore()
-  // }))
+  bus.use(retry({
+    setRetriesRemaining: true
+  }))
 
   return bus
 };

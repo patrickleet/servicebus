@@ -1,3 +1,5 @@
+const log = require('debug')('servicebus-package')
+
 function packageMessage (queueName, message, options, next) {
   if (typeof options === 'function') {
     next = options;
@@ -15,7 +17,13 @@ function packageMessage (queueName, message, options, next) {
 }
 
 function handleIncoming (channel, message, options, next) {
-  message.content.type = message.properties.type || message.content.type;
+  // log('incoming message', {
+  //   channel,
+  //   message,
+  //   options,
+  //   next
+  // })
+  message.content.type = message.properties && message.properties.type || message.content.type;
   next(null, channel, message, options);
 }
 

@@ -173,8 +173,10 @@ class KafkaBus extends Bus {
 
     log(`${callingFunction} called - producing ${messageType} ${topicName}`);
 
-    const sendMessage = async function (topicName, message, { partitionKey = '' }) {
-      log(`sending message to topic ${topicName}`, message)
+    const sendMessage = async function (topicName, message, options) {
+      log(`sending message to topic ${topicName}`, message, options)
+      message.properties = options
+      const { partitionKey = 'default' } = options
       let result = await producer.send({
         topic: topicName,
         compression: CompressionTypes.GZIP,
@@ -210,36 +212,50 @@ class KafkaBus extends Bus {
     })
   }
 
-  // async sendBatch (events, options, callback) {
-  //   const { log, producer, initialized } = this
+  async produceBatch ({ topic, messages, messageType = 'topic' }, options = {}, callback) {
+    const { log, producer, initialized } = this
 
-  //   log(`producing message on topic ${topicName}`);
+    log(`producing message on topic ${topic}`);
 
-  //   const sendMessage = async function (topicName, message, options) {
-  //     // TODO: we could accept a function that calculates a partition 
-  //     // to go along with the message here or accept a specific partition
-  //     // as an option for example if the partition were set as an env var
-  //     // 
-  //     // await producer.send({
-  //     //   topic: 'topic-name',
-  //     //   messages: [
-  //     //     { key: 'key1', value: 'hello world', partition: 0 },
-  //     //     { key: 'key2', value: 'hey hey!', partition: 1 }
-  //     //   ],
-  //     // })
-  //     // 
+    let batchSize = messages.length
+    let count = 0
+    let batch = []
+    let partitionKey = options.partitionKey
 
-  //     log(`producer sending message to topic ${topicName}`, message)
-  //     let result = await producer.sendBatch({
-  //       // ...
-  //     })
+    const sendMessages = async function (topic, message, options) {
+      
+      count++
 
-  //     return result
-  //   }
+      let kafkaMessage = {
+        key: `${partitionKey}-${messageType}`,
+        value: JSON.stringify(message),
+        headers: {
+          'correlation-id': message.cid
+        }
+      }
+
+      batch.push(kafkaMessage)
+
+      if (count === batchSize) {
+        log(`producer sending messages to topic ${topic}`)
+        const topicMessages = [
+          {
+            topic,
+            messages: batch
+          }
+        ]
+        let result = await producer.sendBatch({
+          topicMessages
+        })
+
+        return result
+      }
+    }
   
-  //   // return this.handleOutgoing(topicName, message, options, sendMessage.bind(this));
-  //   // TODO: apply middleware to each message
-  // }
+    messages.map((message) => {
+      this.handleOutgoing(topic, message, options, sendMessages.bind(this));
+    })
+  }
 
 }
 

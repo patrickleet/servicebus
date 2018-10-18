@@ -70,20 +70,33 @@ describe('kafka servicebus', function(){
         setTimeout(() => {
           console.log(`processed ${count} messages`)
         }, time - 100)
-        var count = 0, endCount = 10000;
+        var count = 0, batchSize = 6000, repeatBatch = 2;
+        // 20 batches of 5000 messages = 100,000
         function tryDone(){
           count++;
-          if (count >= endCount) {
+          if (count >= batchSize * repeatBatch) {
             console.log(`processed ${count} messages`)
             resolve();
           }
         }
-        var i = 0;
-        await bus.listen('my.event.3', function (event) {
+
+        await bus.listen('my.command.3', function (event) {
           tryDone();
         });
-        for(var i = 0; i <= endCount; ++i) {
-          await bus.send('my.event.3', { my: 'event' });
+
+        var i = 0;
+        var messages = []
+        for(var i = 0; i < batchSize; ++i) {
+          messages.push({ my: 'event' })
+        }
+
+        for(var r = 0; r < repeatBatch; ++r) {
+          log('sending batch', r)
+          await bus.produceBatch({
+            topic: 'my.command.3',
+            messages,
+            messageType: 'command'
+          });
         }
       })
     });
@@ -165,25 +178,24 @@ describe('kafka servicebus', function(){
     //   });
     // });
 
-    // it.skip('should allow ack:true and autodelete:true for sends', function (done) {
-    //   var expectation = sinon.mock();
-    //   bus.listen('my.event.25', { ack: true, autoDelete: true }, function () {
-    //     expectation();
-    //   });
-    //   setTimeout(function () {
-    //     bus.send('my.event.25', {}, {ack: true});
-    //     setTimeout(function () {
-    //       bus.unlisten('my.event.25').on('success', function () {
-    //         setTimeout(function () {
-    //           expectation.callCount.should.eql(1);
-    //           bus.destroyListener('my.event.25', { force: true }).on('success', function () {
-    //             done();
-    //           });
-    //         }, 100);
-    //       });
-    //     }, 100);
-    //   }, 100);
-    // });
+    it('should allow ack:true', async function () {
+      return new Promise(async (resolve, reject) => {
+        let bus = await kafkabus()
+        await bus.listen('my.event.25', { ack: true }, function (msg, message) {
+          log('msg')
+          log(msg) 
+          log('message')
+          log(message)
+
+          msg.handle.ack()
+          
+          resolve()
+        });
+        setTimeout(async function () {
+          await bus.send('my.event.25', { payload: 'test' }, { ack: true, correlationId: 'test-id' });
+        }, 100);
+      })
+    });
 
   });
 

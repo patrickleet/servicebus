@@ -4,3 +4,4 @@ node_modules
 .queues
 npm-debug.log
 coverage
+*.tmp

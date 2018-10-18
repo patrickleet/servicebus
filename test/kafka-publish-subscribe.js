@@ -1,4 +1,5 @@
 const kafkabus = require('./kafka-bus-shim');
+const log = require('debug')('servicebus:test')
 
 describe('kafka servicebus', function(){
 
@@ -11,6 +12,12 @@ describe('kafka servicebus', function(){
         this.timeout(30000);
 
         await bus.subscribe('my.event.11', function (event) {
+          log(event)
+          event.should.have.property('data')
+          event.data.should.have.property('my')
+          event.should.have.property('type')
+          event.should.have.property('cid')
+          event.should.have.property('datetime')
           resolve(true);
         });
         setTimeout(async function () {
